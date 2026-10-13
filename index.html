@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f4ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="轻食日记">
+  <meta name="description" content="本地优先的每日饮食与热量记录">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>轻食日记</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">YOUR DAILY FOOD LOG</p>
+        <h1>轻食日记<span class="leaf">✳</span></h1>
+      </div>
+      <button class="icon-button" id="settingsBtn" aria-label="设置">⚙</button>
+    </header>
+
+    <main>
+      <section class="date-row">
+        <button class="text-button" id="prevDay">‹ 前一天</button>
+        <label class="date-picker"><input id="dateInput" type="date"><span id="dateLabel"></span></label>
+        <button class="text-button" id="nextDay">后一天 ›</button>
+      </section>
+
+      <section class="hero-card">
+        <div class="hero-top">
+          <div>
+            <p class="muted-light">今日已摄入</p>
+            <div class="calorie-line"><strong id="totalCalories">0</strong><span>kcal</span></div>
+          </div>
+          <div class="ring" id="calorieRing"><div><strong id="remaining">—</strong><small>剩余 kcal</small></div></div>
+        </div>
+        <div class="progress-track"><div id="calorieProgress"></div></div>
+        <div class="hero-bottom"><span>目标 <b id="goalLabel">1800</b> kcal</span><span id="progressLabel">0%</span></div>
+      </section>
+
+      <section class="macro-grid">
+        <article class="macro-card"><span class="macro-dot protein"></span><span class="macro-name">蛋白质</span><strong id="proteinTotal">0 g</strong><div class="mini-track"><i id="proteinBar"></i></div></article>
+        <article class="macro-card"><span class="macro-dot carbs"></span><span class="macro-name">碳水</span><strong id="carbsTotal">0 g</strong><div class="mini-track"><i id="carbsBar"></i></div></article>
+        <article class="macro-card"><span class="macro-dot fat"></span><span class="macro-name">脂肪</span><strong id="fatTotal">0 g</strong><div class="mini-track"><i id="fatBar"></i></div></article>
+      </section>
+
+      <section class="section-heading">
+        <div><p class="eyebrow">TODAY'S MEALS</p><h2>今天吃了什么</h2></div>
+        <button class="primary-button" id="addBtn">＋ 记一笔</button>
+      </section>
+
+      <section id="mealList" class="meal-list"></section>
+
+      <section class="assistant-card">
+        <div class="assistant-icon">✦</div>
+        <div class="assistant-copy">
+          <h3>让 ChatGPT 帮你估算</h3>
+          <p>上传食物照片，得到热量和营养素估算，再粘贴回来。照片识别需要联网；日常记录保存在本机。</p>
+          <button class="outline-button" id="aiBtn">打开 AI 录入助手</button>
+        </div>
+      </section>
+
+      <section class="bottom-actions">
+        <button class="utility-button" id="weightBtn">⚖ 记录体重</button>
+        <button class="utility-button" id="exportBtn">⇩ 导出备份</button>
+        <button class="utility-button" id="importBtn">⇧ 导入数据</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </section>
+
+      <p class="privacy-note">🔒 本地优先 · 饮食记录保存在此设备的浏览器中，不会自动上传。</p>
+    </main>
+    <nav class="bottom-nav"><span class="nav-active">◉<small>饮食</small></span><button id="statsBtn">▥<small>统计</small></button><button id="dataBtn">◇<small>数据</small></button></nav>
+  </div>
+
+  <dialog id="entryDialog" class="sheet-dialog">
+    <form id="entryForm" method="dialog">
+      <div class="dialog-handle"></div>
+      <div class="dialog-title"><div><p class="eyebrow">FOOD ENTRY</p><h2 id="entryTitle">记一笔饮食</h2></div><button type="button" class="close-button" data-close="entryDialog">×</button></div>
+      <label class="field-label">食物名称<input id="foodName" required maxlength="80" placeholder="例如：鸡蛋、米饭、拿铁"></label>
+      <div class="field-row"><label class="field-label">餐次<select id="mealType"><option value="早餐">早餐</option><option value="午餐">午餐</option><option value="晚餐">晚餐</option><option value="加餐">加餐</option></select></label><label class="field-label">份量说明<input id="portion" placeholder="例如：1碗 / 200g"></label></div>
+      <div class="field-row"><label class="field-label">热量 kcal<input id="foodCalories" type="number" min="0" max="20000" step="1" required placeholder="例如：260"></label><label class="field-label">蛋白质 g<input id="foodProtein" type="number" min="0" max="1000" step="0.1" value="0"></label></div>
+      <div class="field-row"><label class="field-label">碳水 g<input id="foodCarbs" type="number" min="0" max="1000" step="0.1" value="0"></label><label class="field-label">脂肪 g<input id="foodFat" type="number" min="0" max="1000" step="0.1" value="0"></label></div>
+      <label class="field-label">备注（可选）<input id="foodNote" maxlength="160" placeholder="例如：少油、酱汁没吃完"></label>
+      <div class="dialog-actions"><button type="button" class="secondary-button" id="deleteEntryBtn" hidden>删除</button><button type="submit" class="primary-button">保存记录</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="aiDialog" class="sheet-dialog">
+    <div class="dialog-handle"></div>
+    <div class="dialog-title"><div><p class="eyebrow">AI FOOD ESTIMATE</p><h2>AI 录入助手</h2></div><button class="close-button" data-close="aiDialog">×</button></div>
+    <ol class="steps">
+      <li>复制下面的提示词，打开 ChatGPT 并上传食物照片。</li>
+      <li>让 ChatGPT 返回 JSON，然后复制结果。</li>
+      <li>粘贴到下方，点击“解析并添加”。保存前可以核对估算值。</li>
+    </ol>
+    <button class="outline-button full-button" id="copyPromptBtn">复制照片估算提示词</button>
+    <label class="field-label">粘贴 ChatGPT 返回的 JSON<textarea id="aiJson" rows="7" placeholder='{"foods":[{"name":"米饭","portion":"1碗约150g","calories":174,"protein":3.2,"carbs":38,"fat":0.4,"meal":"午餐"}]}'></textarea></label>
+    <div class="dialog-actions"><button class="secondary-button" data-close="aiDialog">取消</button><button class="primary-button" id="parseAiBtn">解析并添加</button></div>
+    <p class="small-note">估算会受份量、烹饪方式和配料影响。无法确认的食材应标记为估算，不要把数值当作精确测量。</p>
+  </dialog>
+
+  <dialog id="settingsDialog" class="sheet-dialog">
+    <div class="dialog-handle"></div><div class="dialog-title"><div><p class="eyebrow">PREFERENCES</p><h2>目标设置</h2></div><button class="close-button" data-close="settingsDialog">×</button></div>
+    <label class="field-label">每日热量目标（kcal）<input id="goalInput" type="number" min="500" max="10000" step="50"></label>
+    <p class="small-note">这是记录工具，不替代专业营养建议。热量目标应结合身高、体重、活动量与健康状况合理设定。</p>
+    <div class="dialog-actions"><button class="primary-button" id="saveSettingsBtn">保存设置</button></div>
+  </dialog>
+
+  <dialog id="weightDialog" class="sheet-dialog">
+    <div class="dialog-handle"></div><div class="dialog-title"><div><p class="eyebrow">BODY WEIGHT</p><h2>记录体重</h2></div><button class="close-button" data-close="weightDialog">×</button></div>
+    <label class="field-label">体重（kg）<input id="weightInput" type="number" min="20" max="400" step="0.1" placeholder="例如：68.5"></label>
+    <div class="dialog-actions"><button class="primary-button" id="saveWeightBtn">保存体重</button></div>
+    <p class="small-note" id="weightHistory"></p>
+  </dialog>
+
+  <dialog id="statsDialog" class="sheet-dialog">
+    <div class="dialog-handle"></div><div class="dialog-title"><div><p class="eyebrow">YOUR PROGRESS</p><h2>近期统计</h2></div><button class="close-button" data-close="statsDialog">×</button></div>
+    <div id="statsContent" class="stats-content"></div>
+    <button class="outline-button full-button" data-close="statsDialog">完成</button>
+  </dialog>
+
+  <dialog id="dataDialog" class="sheet-dialog">
+    <div class="dialog-handle"></div><div class="dialog-title"><div><p class="eyebrow">YOUR DATA</p><h2>数据与隐私</h2></div><button class="close-button" data-close="dataDialog">×</button></div>
+    <div class="data-info"><p><b>存储方式：</b>使用此浏览器的本地存储。</p><p><b>联网说明：</b>静态网页可离线打开已缓存页面；ChatGPT 照片估算需要联网并由你主动上传照片。</p><p><b>重要：</b>清理 Safari 网站数据、卸载/重置浏览器或设备故障可能导致本地数据丢失。建议定期导出 JSON 备份。</p><p><b>安装方式：</b>部署后用 Safari 打开网址 → 分享 → 添加到主屏幕。</p></div>
+    <div class="dialog-actions"><button class="primary-button" data-close="dataDialog">知道了</button></div>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>

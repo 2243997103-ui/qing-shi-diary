@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "轻食日记｜本地饮食热量记录",
+  "short_name": "轻食日记",
+  "description": "记录每天的饮食、热量和营养素，数据优先保存在本机。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f4ee",
+  "theme_color": "#f5f4ee",
+  "orientation": "portrait",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+  ]
+}
